@@ -16,7 +16,7 @@ deterministic plumbing (fetching, storage, CLI) is plain Python, and the
   (`fetch`, `matches`, `apply`, `stage`, `interview`, `status`).
 - **Phase 2 — done:** the agent scoring loop (`jobbot run`) — a Claude Agent SDK
   perceive → decide → act loop that scores pending jobs against your criteria.
-- **Phase 3 — next:** daily cron scheduling.
+- **Phase 3 — done:** daily scheduling via `scripts/run_daily.sh` + cron.
 - **Phase 4 (stretch):** Google Calendar events for interviews.
 
 ### How the agent loop works
@@ -68,6 +68,28 @@ jobbot interview list            # scheduled interviews
 ```
 
 The database path defaults to `./jobbot.db` (override with `JOBBOT_DB`).
+
+## Run it daily (cron)
+
+`scripts/run_daily.sh` is a cron-safe entrypoint: it cd's to the repo, loads
+`.env`, sources nvm so the Agent SDK can find the `claude` CLI, pins the DB, and
+logs each run to `logs/`.
+
+Test it by hand first (tiny batch, temp DB):
+
+```bash
+JOBBOT_DB=/tmp/jobbot_test.db JOBBOT_LIMIT=2 ./scripts/run_daily.sh
+```
+
+Then schedule it. Edit your crontab with `crontab -e` and add (daily at 08:00):
+
+```cron
+0 8 * * * /Users/stevedooley/dev/job-bot/scripts/run_daily.sh
+```
+
+Tune cadence/volume with the cron time and `JOBBOT_LIMIT`. On macOS, if cron
+can't run the job, grant **Full Disk Access** to `/usr/sbin/cron` in System
+Settings → Privacy & Security. Logs older than 30 days are pruned automatically.
 
 ## Development
 
