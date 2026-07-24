@@ -1,0 +1,2 @@
+# job-bot: score new identity/healthcare EM postings daily at 08:00
+0 8 * * * /Users/stevedooley/dev/job-bot/scripts/run_daily.sh
