@@ -14,9 +14,22 @@ deterministic plumbing (fetching, storage, CLI) is plain Python, and the
 
 - **Phase 1 — done:** ATS ingestion, SQLite store, and the CLI tracker
   (`fetch`, `matches`, `apply`, `stage`, `interview`, `status`).
-- **Phase 2 — next:** the agent scoring loop (`jobbot run`).
-- **Phase 3:** daily cron scheduling.
+- **Phase 2 — done:** the agent scoring loop (`jobbot run`) — a Claude Agent SDK
+  perceive → decide → act loop that scores pending jobs against your criteria.
+- **Phase 3 — next:** daily cron scheduling.
 - **Phase 4 (stretch):** Google Calendar events for interviews.
+
+### How the agent loop works
+
+`jobbot run` fetches new postings (deterministic), then starts an agent session
+with three custom tools (`get_pending_jobs`, `record_evaluation`,
+`fetch_new_jobs`) and your criteria in the system prompt. The agent pulls the
+work queue, scores each job (0–100 + verdict + reasons), and records the
+results — you watch the loop stream as it goes. A permission gate allows only
+the `jobbot` tools, so the agent never touches the shell or filesystem.
+
+Env knobs: `JOBBOT_MODEL` (default `sonnet`), `JOBBOT_MAX_USD` (per-run budget
+cap, default `2.0`), `JOBBOT_DB` (default `./jobbot.db`).
 
 ## Setup
 

@@ -6,6 +6,8 @@ interview, status. `run` (the agent scoring loop) is wired in Phase 2.
 
 from __future__ import annotations
 
+import asyncio
+
 import typer
 
 from . import db
@@ -33,6 +35,37 @@ def fetch() -> None:
     )
     for err in result.errors:
         typer.secho(f"  ! {err}", fg=typer.colors.YELLOW)
+
+
+@app.command()
+def run(
+    limit: int = typer.Option(15, help="Max pending jobs to score this run."),
+    model: str = typer.Option(None, help="Model override (default env/JOBBOT_MODEL or 'sonnet')."),
+    no_fetch: bool = typer.Option(False, "--no-fetch", help="Skip fetching new postings first."),
+) -> None:
+    """Run the agent scoring loop over pending jobs (fetches first by default)."""
+    from .agent.loop import run_scoring_loop
+
+    conn = _conn()
+    if not no_fetch:
+        result = fetch_new_jobs(conn)
+        typer.echo(f"Fetched {result.fetched} postings, {result.inserted} new.")
+        for err in result.errors:
+            typer.secho(f"  ! {err}", fg=typer.colors.YELLOW)
+
+    typer.secho("Running agent scoring loop...", fg=typer.colors.CYAN)
+    summary = asyncio.run(
+        run_scoring_loop(limit=limit, model=model, emit=typer.echo)
+    )
+
+    cost = f"${summary.cost_usd:.4f}" if summary.cost_usd is not None else "n/a"
+    typer.secho(
+        f"\nDone: {summary.recorded} evaluations recorded "
+        f"({summary.tool_calls} tool calls, {summary.turns} turns, cost {cost}).",
+        fg=typer.colors.GREEN if not summary.is_error else typer.colors.RED,
+    )
+    if summary.recorded:
+        typer.echo("See top matches with: jobbot matches --min-score 60")
 
 
 @app.command()
