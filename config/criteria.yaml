@@ -1,0 +1,33 @@
+# Your job-search criteria. Edit freely — this drives the agent's fit scoring.
+# The agent reads this (via the system prompt) and scores each job 0-100.
+
+titles:            # role titles / keywords you're targeting
+  - Senior Software Engineer
+  - Staff Engineer
+  - Backend Engineer
+
+keywords:          # tech / domain signals that raise fit
+  - Python
+  - distributed systems
+  - APIs
+
+seniority: senior  # junior | mid | senior | staff | principal
+
+locations:         # acceptable locations (city, region, or "Remote")
+  - Remote
+  - San Francisco, CA
+
+remote: preferred  # required | preferred | acceptable | no
+
+min_salary_usd: 150000   # omit or set null if not filtering on comp
+
+must_haves:        # a job missing any of these should score low
+  - Remote-friendly or hybrid
+
+nice_to_haves:     # raise the score but not required
+  - Equity
+  - Small/mid-size company
+
+dealbreakers:      # any of these present -> score should be very low
+  - On-call heavy
+  - Requires relocation with no remote option

@@ -1,0 +1,16 @@
+# ATS job boards to poll. Each entry names a public, no-auth board.
+#
+# How to find the token/company slug:
+#   greenhouse: the slug in boards.greenhouse.io/<token> (e.g. "stripe")
+#   lever:      the slug in jobs.lever.co/<company>       (e.g. "netflix")
+#   ashby:      the slug in jobs.ashbyhq.com/<board>      (e.g. "ramp")
+#
+# Replace these examples with companies you actually want to watch.
+
+sources:
+  - ats: greenhouse
+    token: stripe
+  - ats: lever
+    company: netflix
+  - ats: ashby
+    board: ramp
