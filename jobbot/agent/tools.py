@@ -37,7 +37,7 @@ async def get_pending_jobs(args: dict[str, Any]) -> dict[str, Any]:
     conn = db.connect()
     db.init_db(conn)
     try:
-        jobs = db.pending_jobs(conn, limit=limit)
+        jobs = db.pending_jobs(conn, limit=limit, prioritize_terms=_title_terms())
     finally:
         conn.close()
 
@@ -112,6 +112,34 @@ async def fetch_new_jobs(args: dict[str, Any]) -> dict[str, Any]:
 def _current_model() -> str:
     import os
     return os.environ.get("JOBBOT_MODEL", "sonnet")
+
+
+def _title_terms() -> list[str]:
+    """Title phrases from criteria.yaml used to prioritize the pending queue.
+
+    We match on the full target-title phrases (e.g. "engineering manager") rather
+    than individual words, so Product Managers and "Backend Engineering" roles
+    don't crowd out actual Engineering Manager postings. Very generic titles are
+    dropped so they don't match everything.
+    """
+    from ..config import load_criteria as _load  # local import avoids cycle at import time
+
+    generic = {"manager", "director", "engineer", "engineering"}
+    try:
+        criteria = _load()
+    except Exception:
+        return []
+    terms: set[str] = set()
+    for title in criteria.get("titles", []) or []:
+        phrase = str(title).strip().lower()
+        # Drop a leading "senior "/"software " so "Senior Engineering Manager"
+        # still matches a plain "Engineering Manager" posting.
+        for prefix in ("senior ", "software "):
+            if phrase.startswith(prefix):
+                phrase = phrase[len(prefix):]
+        if phrase and phrase not in generic:
+            terms.add(phrase)
+    return sorted(terms)
 
 
 def build_server():

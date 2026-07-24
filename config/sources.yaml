@@ -1,16 +1,39 @@
-# ATS job boards to poll. Each entry names a public, no-auth board.
+# ATS job boards to poll — identity + healthcare domains.
+# Every board below was verified live (returns jobs) on 2026-07-23.
 #
-# How to find the token/company slug:
-#   greenhouse: the slug in boards.greenhouse.io/<token> (e.g. "stripe")
-#   lever:      the slug in jobs.lever.co/<company>       (e.g. "netflix")
-#   ashby:      the slug in jobs.ashbyhq.com/<board>      (e.g. "ramp")
-#
-# Replace these examples with companies you actually want to watch.
+# To add a company: find its careers URL and add the slug under the right ats:
+#   greenhouse: boards.greenhouse.io/<token>   -> {ats: greenhouse, token: <token>}
+#   lever:      jobs.lever.co/<company>         -> {ats: lever, company: <company>}
+#   ashby:      jobs.ashbyhq.com/<board>        -> {ats: ashby, board: <board>}
 
 sources:
-  - ats: greenhouse
-    token: stripe
-  - ats: lever
-    company: netflix
+  # --- identity / authentication ---
   - ats: ashby
-    board: ramp
+    board: WorkOS
+    display: WorkOS
+  - ats: greenhouse
+    token: transmitsecurity
+    company: Transmit Security
+  - ats: ashby
+    board: oso
+    display: Oso
+  - ats: ashby
+    board: Stytch
+    display: Stytch
+
+  # --- healthcare / health-tech ---
+  - ats: greenhouse
+    token: oscar
+    company: Oscar Health
+  - ats: ashby
+    board: commure
+    display: Commure
+  - ats: greenhouse
+    token: garnerhealth
+    company: Garner Health
+  - ats: ashby
+    board: abridge
+    display: Abridge
+  - ats: greenhouse
+    token: mavenclinic
+    company: Maven Clinic

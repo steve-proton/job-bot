@@ -142,18 +142,43 @@ def get_job(conn: sqlite3.Connection, job_id: int) -> Job | None:
     return _row_to_job(row) if row else None
 
 
-def pending_jobs(conn: sqlite3.Connection, limit: int = 50) -> list[Job]:
-    """Jobs that have no evaluation yet — the agent's work queue."""
-    rows = conn.execute(
-        """
-        SELECT j.* FROM jobs j
-        LEFT JOIN evaluations e ON e.job_id = j.id
-        WHERE e.id IS NULL
-        ORDER BY j.fetched_at DESC
-        LIMIT ?
-        """,
-        (limit,),
-    ).fetchall()
+def pending_jobs(
+    conn: sqlite3.Connection,
+    limit: int = 50,
+    prioritize_terms: list[str] | None = None,
+) -> list[Job]:
+    """Jobs that have no evaluation yet — the agent's work queue.
+
+    When ``prioritize_terms`` is given, jobs whose title contains any of the
+    terms are returned first (then newest). This lets a bounded run spend its
+    budget on the most relevant roles instead of wading through the whole board.
+    """
+    terms = [t.strip().lower() for t in (prioritize_terms or []) if t and t.strip()]
+    if terms:
+        # A CASE expression flags title matches; ties break on recency.
+        match_sql = " OR ".join("instr(lower(j.title), ?) > 0" for _ in terms)
+        rows = conn.execute(
+            f"""
+            SELECT j.* FROM jobs j
+            LEFT JOIN evaluations e ON e.job_id = j.id
+            WHERE e.id IS NULL
+            ORDER BY (CASE WHEN {match_sql} THEN 1 ELSE 0 END) DESC,
+                     j.fetched_at DESC
+            LIMIT ?
+            """,
+            (*terms, limit),
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            """
+            SELECT j.* FROM jobs j
+            LEFT JOIN evaluations e ON e.job_id = j.id
+            WHERE e.id IS NULL
+            ORDER BY j.fetched_at DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
     return [_row_to_job(r) for r in rows]
 
 

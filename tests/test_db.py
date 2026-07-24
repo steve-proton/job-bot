@@ -53,6 +53,23 @@ def test_pending_and_evaluation_flow():
     assert matches[0]["verdict"] == "strong"
 
 
+def test_pending_prioritizes_matching_titles():
+    conn = make_db()
+    # Insert an off-target job first (older), a matching one second (newer).
+    db.upsert_job(conn, sample_job(external_id="10", title="Account Executive"))
+    db.upsert_job(conn, sample_job(external_id="11", title="Engineering Manager, Platform"))
+    db.upsert_job(conn, sample_job(external_id="12", title="Field Marketing Lead"))
+
+    # Without prioritization: newest-first (external_id 12 last inserted -> first).
+    plain = db.pending_jobs(conn)
+    assert plain[0].title == "Field Marketing Lead"
+
+    # With prioritization on "manager": the EM role jumps to the front even though
+    # it isn't the newest.
+    prioritized = db.pending_jobs(conn, prioritize_terms=["manager", "engineering"])
+    assert prioritized[0].title == "Engineering Manager, Platform"
+
+
 def test_application_and_interview_tracking():
     conn = make_db()
     job_id, _ = db.upsert_job(conn, sample_job())

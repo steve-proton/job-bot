@@ -2,32 +2,39 @@
 # The agent reads this (via the system prompt) and scores each job 0-100.
 
 titles:            # role titles / keywords you're targeting
-  - Senior Software Engineer
-  - Staff Engineer
-  - Backend Engineer
+  - Engineering Manager
+  - Senior Engineering Manager
+  - Director of Engineering
+  - Software Engineering Manager
 
 keywords:          # tech / domain signals that raise fit
-  - Python
-  - distributed systems
-  - APIs
+  - identity
+  - authentication
+  - IAM
+  - healthcare
+  - health tech
+  - digital health
 
-seniority: senior  # junior | mid | senior | staff | principal
+seniority: manager   # junior | mid | senior | staff | manager | director
 
-locations:         # acceptable locations (city, region, or "Remote")
+locations:         # acceptable locations
   - Remote
-  - San Francisco, CA
+  - Boston, MA
+  - Greater Boston
 
 remote: preferred  # required | preferred | acceptable | no
 
-min_salary_usd: 150000   # omit or set null if not filtering on comp
+min_salary_usd: null   # not filtering on comp for now
 
 must_haves:        # a job missing any of these should score low
-  - Remote-friendly or hybrid
+  - People-management role (has direct reports)
+  - Remote-friendly, or based in the Boston metro area
 
 nice_to_haves:     # raise the score but not required
+  - Identity / authentication / IAM domain
+  - Healthcare / health-tech domain
   - Equity
-  - Small/mid-size company
 
-dealbreakers:      # any of these present -> score should be very low
-  - On-call heavy
-  - Requires relocation with no remote option
+dealbreakers:      # any of these present -> score very low
+  - Individual-contributor-only (no direct reports)
+  - Requires relocation outside Boston with no remote option
